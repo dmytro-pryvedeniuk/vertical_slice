@@ -1,0 +1,78 @@
+### Get destinations with filtering
+GET {{HostAddressRoot}}/api/destinations?searchFor=a
+Accept: application/json
+
+### Get all destinations
+GET {{HostAddressRoot}}/api/destinations
+Accept: application/json
+
+### Get itineraries with filtering
+GET {{HostAddressRoot}}/api/itineraries?searchFor=As
+Accept: application/json
+Authorization: Bearer {{TokenWithGetItinerariesFeatureClaim}}
+
+### Get all itineraries
+GET {{HostAddressRoot}}/api/itineraries
+Accept: application/json
+Authorization: Bearer {{TokenWithGetItinerariesFeatureClaim}}
+
+### Get stops
+GET {{HostAddressRoot}}/api/itineraries/1/stops
+Accept: application/json
+Authorization: Bearer {{TokenWithoutClaims}}
+
+### Get stops for an unknown itinerary, expecting 404
+GET {{HostAddressRoot}}/api/itineraries/1000/stops
+Accept: application/json
+Authorization: Bearer {{TokenWithoutClaims}}
+
+### Create stop
+POST {{HostAddressRoot}}/api/itineraries/1/stops
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{TokenWithWriteScopeClaim}}
+
+{
+    "name": "Sofia",
+    "imageUri": "https://localhost:7120/sofia.jpg"
+}
+
+### Try to create an invalid stop
+POST {{HostAddressRoot}}/api/itineraries/1/stops
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{TokenWithWriteScopeClaim}}
+
+{
+    "name": "",
+    "imageUri": "abc"
+}
+
+### Update stop
+PUT {{HostAddressRoot}}/api/itineraries/1/stops/1
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{TokenWithWriteScopeClaim}}
+
+{
+    "name": "Paris2",
+    "imageUri": "https://localhost:7120/paris2.jpg",
+    "suggested": false
+}
+
+### Update stop with invalid state
+PUT {{HostAddressRoot}}/api/itineraries/1/stops/1
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{TokenWithWriteScopeClaim}}
+
+{
+    "name": "",
+    "imageUri": "abc"
+}
+
+
+### Get destinations with filtering
+GET {{HostAddressRoot}}/api/itineraries
+Accept: application/json  
+Authorization: Bearer {{TokenWithGetItinerariesFeatureClaim}}
