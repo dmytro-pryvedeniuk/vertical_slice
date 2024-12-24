@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using TravelInspiration.API.Shared.Domain.Entities;
 using TravelInspiration.API.Shared.Persistence;
+using TravelInspiration.API.Shared.Security;
 using TravelInspiration.API.Shared.Slices;
 
 namespace TravelInspiration.API.Features.Itineraries;
@@ -13,7 +14,7 @@ public sealed class GetItineraries : ISlice
     private static AuthorizationPolicy HasGetItinerariesFeaturePolicy =>
         new AuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
-            .RequireClaim("feature", "get-itineraries")
+            .RequireClaim("permissions", "feature:get-itineraries")
             .Build();
 
     public void AddEndpoint(IEndpointRouteBuilder endpointRouteBuilder)

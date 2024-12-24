@@ -1,3 +1,5 @@
+@HostAddressRoot=https://localhost:7293
+
 ### Get destinations with filtering
 GET {{HostAddressRoot}}/api/destinations?searchFor=a
 Accept: application/json

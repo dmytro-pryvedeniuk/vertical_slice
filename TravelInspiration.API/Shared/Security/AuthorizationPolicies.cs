@@ -7,6 +7,6 @@ public static class AuthorizationPolicies
     public static AuthorizationPolicy HasWriteActionPolicy =>
         new AuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
-            .RequireClaim("scope", "write")
+            .RequireClaim("permissions", "scope:write")
             .Build();
 }
