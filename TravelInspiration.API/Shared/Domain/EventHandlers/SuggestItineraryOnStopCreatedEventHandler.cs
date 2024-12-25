@@ -5,12 +5,10 @@ using TravelInspiration.API.Shared.Persistence;
 namespace TravelInspiration.API.Shared.Domain.EventHandlers;
 
 public sealed class SuggestItineraryOnStopCreatedEventHandler(
-    ILogger<SuggestItineraryOnStopCreatedEventHandler> logger,
-    TravelInspirationDbContext dbContext)
+    ILogger<SuggestItineraryOnStopCreatedEventHandler> logger)
     : INotificationHandler<StopCreatedEvent>
 {
     private readonly ILogger<SuggestItineraryOnStopCreatedEventHandler> _logger = logger;
-    private readonly TravelInspirationDbContext _dbContext = dbContext;
 
     public Task Handle(
         StopCreatedEvent notification,

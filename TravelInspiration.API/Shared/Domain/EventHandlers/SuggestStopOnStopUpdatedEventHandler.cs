@@ -21,16 +21,14 @@ public sealed class SuggestStopOnStopUpdatedEventHandler(
             GetType().Name,
             notification.GetType().Name);
 
-        var incomingStop = notification.Stop;
-
-        var stop = new Stop($"AI-generated stop based on {incomingStop.Name}")
+        var stop = new Stop($"AI-generated stop based on {notification.Name}")
         {
-            ItineraryId = incomingStop.ItineraryId,
+            ItineraryId = notification.ItineraryId,
             ImageUri = new Uri("http://herebeimages.com/aigeneratedimage.png"),
             Suggested = true
         };
 
         _dbContext.Stops.Add(stop);
-        return Task.CompletedTask;
+        return _dbContext.SaveChangesAsync();
     }
 }

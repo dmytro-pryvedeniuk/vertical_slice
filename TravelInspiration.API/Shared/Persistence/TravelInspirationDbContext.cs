@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using TravelInspiration.API.Shared.Domain;
 using TravelInspiration.API.Shared.Domain.Entities;
 using TravelInspiration.API.Shared.Security;
@@ -8,15 +9,14 @@ namespace TravelInspiration.API.Shared.Persistence;
 
 public sealed class TravelInspirationDbContext(
     ICurrentUserService currentUserService,
-    IPublisher publisher,
     DbContextOptions<TravelInspirationDbContext> options)
     : DbContext(options)
 {
     private readonly ICurrentUserService _currentUserService = currentUserService;
-    private readonly IPublisher _publisher = publisher;
 
     public DbSet<Itinerary> Itineraries => Set<Itinerary>();
     public DbSet<Stop> Stops => Set<Stop>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -97,17 +97,26 @@ public sealed class TravelInspirationDbContext(
             }
         }
 
-        var domainEvents = ChangeTracker.Entries<IHasDomainEvents>()
+        var entriesWithDomainEvents = ChangeTracker.Entries<IHasDomainEvents>().ToArray();
+        var outboxMessages = entriesWithDomainEvents
             .SelectMany(x => x.Entity.DomainEvents)
-            .Where(x => !x.IsPublished)
-            .ToArray();
+            .Select(x => new OutboxMessage
+            {
+                OccurredOn = x.OccurredOn,
+                Content = JsonConvert.SerializeObject(
+                    x,
+                    new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.All
+                    }
+                )
+            });
 
-        foreach (var domainEvent in domainEvents)
-        {
-            await _publisher.Publish(domainEvent, cancellationToken);
-            domainEvent.IsPublished = true;
-        }
+        await OutboxMessages.AddRangeAsync(outboxMessages, cancellationToken);
+        var result = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        foreach (var entry in entriesWithDomainEvents)
+            entry.Entity.DomainEvents.Clear();
 
-        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        return result;
     }
 }

@@ -11,7 +11,7 @@ public sealed class SliceFixture
     private readonly TravelInspirationWebApplicationFactory _factory;
     private static readonly Lock _lock = new();
     private static bool _dbInitialized = false;
-    private IServiceScope _scope;
+    private IServiceScope? _scope;
 
     public IServiceScopeFactory ServiceScopeFactory { get; }
 

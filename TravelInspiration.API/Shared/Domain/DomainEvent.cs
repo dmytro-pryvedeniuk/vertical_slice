@@ -4,6 +4,5 @@ namespace TravelInspiration.API.Shared.Domain;
 
 public abstract class DomainEvent : INotification
 {
-    public bool IsPublished { get; set; }
-    public DateTimeOffset OccuredOn { get; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset OccurredOn { get; set; } = DateTimeOffset.UtcNow;
 }

@@ -1,4 +1,6 @@
+using Quartz;
 using TravelInspiration.API;
+using TravelInspiration.API.BackgroundJobs;
 using TravelInspiration.API.Shared.Slices;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +15,20 @@ builder.Services.AddAuthentication("Bearer")
 
 builder.Services.RegisterApplicationServices();
 builder.Services.RegisterPersistenceServices(builder.Configuration);
+builder.Services.AddQuartz(configure =>
+{
+    var jobKey = new JobKey(nameof(ProcessOutboxMessagesJob));
+    configure
+        .AddJob<ProcessOutboxMessagesJob>(jobKey)
+        .AddTrigger(trigger => trigger
+            .ForJob(jobKey)
+            .WithSimpleSchedule(schedule => schedule
+                .WithIntervalInSeconds(10)
+                .RepeatForever()
+            )
+        );
+});
+builder.Services.AddQuartzHostedService();
 
 var app = builder.Build();
 

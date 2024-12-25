@@ -19,7 +19,7 @@ public sealed class Stop(string name) : AuditableEntity, IHasDomainEvents
     {
         ItineraryId = request.ItineraryId;
         ImageUri = request.ImageUri is null ? null : new Uri(request.ImageUri);
-        DomainEvents.Add(new StopCreatedEvent(this));
+        DomainEvents.Add(new StopCreatedEvent(ItineraryId, Name));
     }
 
     public void HandleUpdateStopCommand(UpdateStopCommand request)
@@ -27,6 +27,6 @@ public sealed class Stop(string name) : AuditableEntity, IHasDomainEvents
         Name = request.Name;
         ImageUri = request.ImageUri is null ? null : new Uri(request.ImageUri);
         Suggested = request.Suggested;
-        DomainEvents.Add(new StopUpdatedEvent(this));
+        DomainEvents.Add(new StopUpdatedEvent(ItineraryId, Name));
     }
 }
