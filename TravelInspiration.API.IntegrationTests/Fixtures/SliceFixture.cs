@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TravelInspiration.API.IntegrationTests.Factories;
 using TravelInspiration.API.Shared.Persistence;
 
-namespace TravelInspiration.API.IntegrationTests.Features;
+namespace TravelInspiration.API.IntegrationTests.Fixtures;
 
 public sealed class SliceFixture
 {
@@ -31,6 +31,8 @@ public sealed class SliceFixture
                 context.Database.EnsureCreated();
                 context.Stops.RemoveRange([.. context.Stops]);
                 context.Itineraries.RemoveRange([.. context.Itineraries]);
+                context.OutboxMessages.RemoveRange([.. context.OutboxMessages]);
+
                 context.SaveChanges();
 
                 _dbInitialized = true;

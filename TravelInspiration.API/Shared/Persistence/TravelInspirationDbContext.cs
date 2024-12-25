@@ -1,19 +1,12 @@
-﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using TravelInspiration.API.Shared.Domain;
+﻿using Microsoft.EntityFrameworkCore;
 using TravelInspiration.API.Shared.Domain.Entities;
-using TravelInspiration.API.Shared.Security;
 
 namespace TravelInspiration.API.Shared.Persistence;
 
 public sealed class TravelInspirationDbContext(
-    ICurrentUserService currentUserService,
     DbContextOptions<TravelInspirationDbContext> options)
     : DbContext(options)
 {
-    private readonly ICurrentUserService _currentUserService = currentUserService;
-
     public DbSet<Itinerary> Itineraries => Set<Itinerary>();
     public DbSet<Stop> Stops => Set<Stop>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
@@ -73,50 +66,5 @@ public sealed class TravelInspirationDbContext(
         }
         modelBuilder.Entity<Itinerary>().HasData(itineraries);
         modelBuilder.Entity<Stop>().HasData(stops);
-    }
-
-    public override async Task<int> SaveChangesAsync(
-        bool acceptAllChangesOnSuccess,
-        CancellationToken cancellationToken = default)
-    {
-        var userId = _currentUserService.UserId ?? string.Empty;
-        foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
-        {
-            switch (entry.State)
-            {
-                case EntityState.Added:
-                    entry.Entity.CreatedBy = userId;
-                    entry.Entity.CreatedOn = DateTime.UtcNow;
-                    entry.Entity.LastModifiedBy = userId;
-                    entry.Entity.LastModifiedAt = DateTime.UtcNow;
-                    break;
-                case EntityState.Modified:
-                    entry.Entity.LastModifiedBy = userId;
-                    entry.Entity.LastModifiedAt = DateTime.UtcNow;
-                    break;
-            }
-        }
-
-        var entriesWithDomainEvents = ChangeTracker.Entries<IHasDomainEvents>().ToArray();
-        var outboxMessages = entriesWithDomainEvents
-            .SelectMany(x => x.Entity.DomainEvents)
-            .Select(x => new OutboxMessage
-            {
-                OccurredOn = x.OccurredOn,
-                Content = JsonConvert.SerializeObject(
-                    x,
-                    new JsonSerializerSettings
-                    {
-                        TypeNameHandling = TypeNameHandling.All
-                    }
-                )
-            });
-
-        await OutboxMessages.AddRangeAsync(outboxMessages, cancellationToken);
-        var result = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-        foreach (var entry in entriesWithDomainEvents)
-            entry.Entity.DomainEvents.Clear();
-
-        return result;
     }
 }

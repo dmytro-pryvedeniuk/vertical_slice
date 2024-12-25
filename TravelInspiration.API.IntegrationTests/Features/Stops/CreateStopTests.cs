@@ -1,12 +1,9 @@
-﻿
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore;
 using TravelInspiration.API.Features.Stops;
-using TravelInspiration.API.Shared.Domain;
+using TravelInspiration.API.IntegrationTests.Fixtures;
 using TravelInspiration.API.Shared.Domain.Entities;
 using TravelInspiration.API.Shared.Domain.Events;
+using TravelInspiration.API.Shared.Persistence;
 
 namespace TravelInspiration.API.IntegrationTests.Features.Stops;
 
@@ -52,15 +49,7 @@ public sealed class CreateStopTests(SliceFixture sliceFixture)
             // Assert
             context.ChangeTracker.Clear();
             var outboxMessage = await context.OutboxMessages.SingleAsync();
-            var eventFromMessage = JsonConvert.DeserializeObject(
-                outboxMessage.Content,
-                new JsonSerializerSettings
-                {
-                    TypeNameHandling = TypeNameHandling.All
-                }
-            );
-            Assert.IsType<StopCreatedEvent>(eventFromMessage);
-            var stopCreatedEvent = (StopCreatedEvent)eventFromMessage;
+            var stopCreatedEvent = DomainEventSerializer.Deserialize<StopCreatedEvent>(outboxMessage.Content);
             Assert.Equal(cmd.ItineraryId, stopCreatedEvent.ItineraryId);
             Assert.Equal(cmd.Name, stopCreatedEvent.Name);
         });

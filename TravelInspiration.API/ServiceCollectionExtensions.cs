@@ -36,10 +36,17 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddDbContext<TravelInspirationDbContext>(options =>
+        services.AddScoped<UpdateAuditableEntitiesInterceptor>();
+        services.AddSingleton<InsertOutboxMessagesInterceptor>();
+
+        services.AddDbContext<TravelInspirationDbContext>((sp, options) =>
         {
             var connectionString = configuration.GetConnectionString("TravelInspirationDbConnection");
-            options.UseSqlServer(connectionString);
+            options
+                .UseSqlServer(connectionString)
+                .AddInterceptors(
+                    sp.GetRequiredService<UpdateAuditableEntitiesInterceptor>(),
+                    sp.GetRequiredService<InsertOutboxMessagesInterceptor>());
         });
         return services;
     }

@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using TravelInspiration.API.Shared.Domain.Events;
-using TravelInspiration.API.Shared.Persistence;
 
 namespace TravelInspiration.API.Shared.Domain.EventHandlers;
 

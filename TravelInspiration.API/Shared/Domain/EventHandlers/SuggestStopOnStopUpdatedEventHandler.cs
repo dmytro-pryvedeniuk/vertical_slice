@@ -29,6 +29,6 @@ public sealed class SuggestStopOnStopUpdatedEventHandler(
         };
 
         _dbContext.Stops.Add(stop);
-        return _dbContext.SaveChangesAsync();
+        return _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

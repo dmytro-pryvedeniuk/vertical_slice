@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using Quartz;
 using TravelInspiration.API.Shared.Domain;
 using TravelInspiration.API.Shared.Persistence;
@@ -27,14 +26,7 @@ public sealed class ProcessOutboxMessagesJob(
         {
             try
             {
-                var domainEvent = JsonConvert.DeserializeObject<DomainEvent>(
-                    message.Content,
-                    new JsonSerializerSettings
-                    {
-                        TypeNameHandling = TypeNameHandling.All
-                    }
-                ) ?? throw new ArgumentException("Event can't be deserialized.");
-
+                var domainEvent = DomainEventSerializer.Deserialize<DomainEvent>(message.Content);
                 await _publisher.Publish(domainEvent);
             }
             catch (Exception ex)
